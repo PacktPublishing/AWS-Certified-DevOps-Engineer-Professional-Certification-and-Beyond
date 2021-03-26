@@ -1,0 +1,24 @@
+ {
+  "Version": "2012-10-17",
+  "Id": "s3-event-sns-ID",
+  "Statement": [
+    {
+      "Sid": "s3-publish-ID",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "s3.amazonaws.com"
+      },
+      "Action": "SNS:Publish",
+      "Resource": "arn:aws:sns:region:account-num:sns-topic",
+      "Condition": {
+        "StringEquals": {
+          "aws:SourceAccount": "account-num"
+        },
+        "ArnLike": {
+          "aws:SourceArn": "arn:aws:s3:::bucket-name"
+        }
+      }
+    }
+  ]
+}
+
