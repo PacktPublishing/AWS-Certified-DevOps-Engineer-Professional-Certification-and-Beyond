@@ -1,0 +1,10 @@
+aws s3control create-job \
+    --region us-east-2 \    --account-id acct-id \
+    --operation '{"S3PutObjectTagging": { "TagSet": [{"Key":"DELETE", "Value":"TRUE"}] }}' \
+    --manifest '{"Spec":{"Format":"S3BatchOperations_CSV_20180820","Fields":["Bucket","Key"]},"Location":{"ObjectArn":"arn:aws:s3:::devopspro-beyond/manifest.csv","ETag":"60e460c9d1046e73f7dde5043ac3ae85"}}'
+    --report '{"Bucket":"arn:aws:s3:::devopspro-beyond","Prefix":"final-reports", "Format":"Report_CSV_20180820","Enabled":true,"ReportScope":"AllTasks"}' \
+    --priority 42 \
+    --role-arn IAM-role \
+    --client-request-token $(uuidgen) \
+    --description "S3 Batch job Description" \
+    --no-confirmation-required
