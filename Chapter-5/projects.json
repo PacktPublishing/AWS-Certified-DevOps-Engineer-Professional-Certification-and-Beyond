@@ -1,0 +1,67 @@
+{ "projects": [
+    {
+        "PutRequest": {
+            "Item": {
+                "Project_ID": {"N": "0000"},
+                "Dept": {"S": "Operations"},
+                "Dept_ID": {"N": "0000"},
+                "Project_Name": {"S": "IAM Buildout"},
+                "Owner": {"S": "Amit Omar"},
+                "Language": {"S": "JSON"},
+                "Contact": {"S": "cloud_ops@testcompany.com"}
+            }
+        }
+    },
+    {
+        "PutRequest": {
+            "Item": {
+                "Project_ID": {"N": "0001"},
+                "Dept": {"S": "Operations"},
+                "Dept_ID": {"N": "0000"},
+                "Project_Name": {"S": "Transit VPC"},
+                "Owner": {"S": "Joey Balogney"},
+                "Builds": {"NS": ["25263352"]},
+                "Language": {"S": "YAML"},
+                "Contact": {"S": "cloud_ops@testcompany.com"}
+            }
+        }
+    },
+    {
+        "PutRequest": {
+            "Item": {
+        "Project_ID": {"N": "0003"},
+        "Dept": {"S": "Customer Service"},
+        "Dept_ID": {"N": "0040"},
+        "Project_Name": {"S": "Ticket Tracker"},
+        "Owner": {"S": "Debra Rondell"},
+        "Builds": {"NS":  ["215261512","215244542"] },
+        "Language": {"S": "Javascript" },
+        "Contact": {"S": "customer_servce@testcompany.com" }
+            }
+        }
+    },
+    {
+        "PutRequest": {
+            "Item": {
+                "Project_ID": {"N": "0004"},
+                "Dept": {"S": "DevSec"},
+                "Dept_ID": {"N": "0002"},
+                "Project_Name": {"S": "Static Code Scan"},
+                "Contact": {"S": "devsec@testcompany.com"}
+            }
+        }
+    },
+    {
+        "PutRequest": {
+            "Item": {
+                "Project_ID": {"N": "0005"},
+                "Dept": {"S": "Training"},
+                "Dept_ID": {"N": "0100"},
+                "Project_Name": {"S": "Moodle Test"},
+                "Owner": {"S": "Wanda Johanson"},
+                "Language": {"S": "php"},
+                "Contact": {"S": "training@testcompany.com"}
+            }
+        }
+    }
+] }
