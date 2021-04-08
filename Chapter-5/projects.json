@@ -36,7 +36,7 @@
         "Owner": {"S": "Debra Rondell"},
         "Builds": {"NS":  ["215261512","215244542"] },
         "Language": {"S": "Javascript" },
-        "Contact": {"S": "customer_servce@testcompany.com" }
+        "Contact": {"S": "customer_service@testcompany.com" }
             }
         }
     },
@@ -63,5 +63,74 @@
                 "Contact": {"S": "training@testcompany.com"}
             }
         }
+    },
+    {
+        "PutRequest": {
+            "Item": {
+                "Project_ID": {"N": "0006"},
+                "Dept": {"S": "DevSec"},
+                "Dept_ID": {"N": "0002"},
+                "Project_Name": {"S": "Config Rules"},
+                "Owner": {"S": "Manesh Patel"},
+                "Builds": {"NS":  ["2255464"] },
+                "Language": {"S": "python" },
+                "Contact": {"S": "devsec@testcompany.com" }
+            }
+        }
+    },
+    {
+        "PutRequest": {
+            "Item": {
+                "Project_ID": {"N": "0007"},
+                "Dept": {"S": "Training"},
+                "Dept_ID": {"N": "0100"},
+                "Project_Name": {"S": "Compliance Tracker"},
+                "Owner": {"S": "Wanda Johanson"},
+                "Language": {"S": "javascript" },
+                "Contact": {"S": "training@testcompany.com" }
+            }
+        }
+    },
+    {
+        "PutRequest": {
+            "Item": {
+                "Project_ID": {"N": "0008"},
+                "Dept": {"S": "Operations"},
+                "Dept_ID": {"N": "0000"},
+                "Project_Name": {"S": "Artifactory Server"},
+                "Owner": {"S": "Joey Balogney"},
+                "Builds": {"NS":  ["2255712", "2255723"] },
+                "Language": {"S": "yaml" },
+                "Contact": {"S": "cloud_ops@testcompany.com" }
+            }
+        }
+    },
+    {
+        "PutRequest": {
+            "Item": {
+                "Project_ID": {"N": "0009"},
+                "Dept": {"S": "Test Team"},
+                "Dept_ID": {"N": "0060"},
+                "Project_Name": {"S": "JMeter FrontEnd Test"},
+                "Owner": {"S": "Barnie Buston"},
+                "Builds": {"NS":  ["2255013"] },
+                "Language": {"S": "Java" },
+                "Contact": {"S": "bbuston@testcompany.com" }
+            }
+        }
+    },
+    {
+        "PutRequest": {
+            "Item": {
+                "Project_ID": {"N": "0010"},
+                "Dept": {"S": "Development"},
+                "Dept_ID": {"N": "0010"},
+                "Project_Name": {"S": "Bitwolf"},
+                "Owner": {"S": "Selby Downse"},
+                "Language": {"S": "python" },
+                "Contact": {"S": "sdownse@testcompany.com" }
+            }
+        }
     }
+
 ] }
