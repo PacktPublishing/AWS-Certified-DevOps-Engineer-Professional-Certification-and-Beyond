@@ -1,3 +1,4 @@
 {
-    ":v1": {"S": "Operations"}
+    ":v1": {"S": "Operations"},
+    ":v2": {"S": "Artifactory Server"}
 }
