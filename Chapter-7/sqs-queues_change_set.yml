@@ -1,0 +1,146 @@
+Description: "AWS CloudFormation Sample Template SQS_With_CloudWatch_Alarms: Sample template showing how to create an SQS queue with Amazon CloudWatch alarms on queue depth. **WARNING** This template creates an Amazon SQS queue and one or more Amazon CloudWatch alarms. You will be billed for the AWS resources used if you create a stack from this template."
+Parameters: 
+  QueueName: 
+    Description: "QueueName"
+    Type: "String"
+  MaxMessageSize: 
+    Default: "4048"
+    Description: "Maximum message size default of 4048 bytes or 4 KiB"
+    Type: "Number"
+  QueueDepthAlarmThreshold: 
+    Default: "10"
+    Description: "Email address to notify if operational problems arise"
+    Type: "Number"
+  AlarmEmail: 
+    Default: "nobody@amazon.com"
+    Description: "Email address to notify if operational problems arise"
+    Type: "String"
+  # LambdaFunctionBucketName:
+  #   Description: Bucket name where the lambda function resides 
+  #   Type: String  
+  # LambdaFunctionFileName:
+  #   Description: Lambda function file name  
+  #   Type: String  
+Resources: 
+  LambdaExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: /
+      Policies:
+        - PolicyName: sqs-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Action:
+              - sqs:DeleteMessage
+              - sqs:ReceiveMessage
+              - sqs:SendMessage
+              Resource: "*" 
+              Effect: Allow
+
+        - PolicyName: cloudwatchlogswrite-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              Resource: "*"
+              Effect: Allow 
+  MyQueue: 
+    Type: "AWS::SQS::Queue"
+    Properties: 
+      QueueName: 
+        Ref: "QueueName"
+      MaximumMessageSize:
+        Ref: "MaxMessageSize"
+  AlarmTopic: 
+    Type: "AWS::SNS::Topic"
+    Properties: 
+      Subscription: 
+        - 
+          Endpoint: 
+            Ref: "AlarmEmail"
+          Protocol: "email"
+  QueueDepthAlarm: 
+    Type: "AWS::CloudWatch::Alarm"
+    Properties: 
+      AlarmDescription: "Alarm if queue depth grows beyond 10 messages"
+      Namespace: "AWS/SQS"
+      MetricName: "ApproximateNumberOfMessagesVisible"
+      Dimensions: 
+        - 
+          Name: "QueueName"
+          Value: 
+            Fn::GetAtt: 
+              - "MyQueue"
+              - "QueueName"
+      Statistic: "Sum"
+      Period: "300"
+      EvaluationPeriods: "1"
+      Threshold: 
+        Ref: "QueueDepthAlarmThreshold"
+      ComparisonOperator: "GreaterThanThreshold"
+      AlarmActions: 
+        - 
+          Ref: "AlarmTopic"
+      InsufficientDataActions: 
+        - 
+          Ref: "AlarmTopic"
+
+  CreateLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: "python3.8"
+      Timeout: 60
+      Handler: "index.lambda_handler"
+      Code: 
+        ZipFile: |
+          from __future__ import print_function # Python 2/3 compatibility
+          import boto3
+          import botocore
+          import json
+          import decimal
+          import urllib
+          import cfnresponse
+
+          # Resource 
+          sqs = boto3.resource('sqs')
+          #s3 = boto3.client('s3')
+
+          # Constants
+          #table = dynamodb.Table('AlertConfiguration')
+
+          def lambda_handler(event, context):
+            try:                
+              
+
+              print(event)
+              print( event['RequestType'] ) 
+      
+Outputs: 
+  QueueURL: 
+    Description: "URL of newly created SQS Queue"
+    Value: 
+      Ref: "MyQueue"
+  QueueARN: 
+    Description: "ARN of newly created SQS Queue"
+    Value: 
+      Fn::GetAtt: 
+        - "MyQueue"
+        - "Arn"
+  QueueName: 
+    Description: "Name newly created SQS Queue"
+    Value: 
+      Fn::GetAtt: 
+        - "MyQueue"
+        - "QueueName"
