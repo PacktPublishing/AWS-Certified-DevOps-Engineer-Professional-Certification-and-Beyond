@@ -1,0 +1,24 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A Basic DynamoDB to catch egress from Lambda Function 
+Resources:
+  ProjectTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - 
+          AttributeName: "Project_ID"
+          AttributeType: "N"
+      KeySchema: 
+        - 
+          AttributeName: Project_ID
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5    
+
+Outputs:
+  ProjectTable:
+    Value: !Ref ProjectTable
+  ProjectTableArn:
+    Value: !GetAtt ProjectTable.Arn

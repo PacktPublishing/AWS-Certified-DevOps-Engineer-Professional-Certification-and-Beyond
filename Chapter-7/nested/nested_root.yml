@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  S3url:
+    Type: String
+    Default: 'https://devopspro-beyond.s3.us-east-2.amazonaws.com'
+    Description: 'The URL of the S3 bucket to upload the child templates, to be passed to the child stacks'
+Resources:
+  BucketStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: nested_bucket.yml
+      TimeoutInMinutes: '10'
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: nested_lambda.yml
+      # Parameters:
+      #   BucketName: 
+      #     Fn::GetAtt: 
+      #     - BucketStack
+      #     - Outputs.BucketName
+  DataStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      #TemplateURL: !Join [ '', [ !Ref S3url,'/nested_dynamo.yml' ]]
+      TemplateURL: nested_dynamo.yml
+      TimeoutInMinutes: '15'
+
+Outputs:
+  StackRef:
+    Value: !Ref BucketStack
+  OutputFromNestedStack:
+    Value: !GetAtt BucketStack.Outputs.BucketName
+  S3url:
+    Value: !Ref S3url

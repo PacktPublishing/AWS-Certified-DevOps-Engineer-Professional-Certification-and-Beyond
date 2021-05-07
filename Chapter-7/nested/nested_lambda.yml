@@ -1,0 +1,75 @@
+Description: "AWS CloudFormation Sample Template SQS_With_CloudWatch_Alarms: Sample template showing how to create an SQS queue with Amazon CloudWatch alarms on queue depth. **WARNING** This template creates an Amazon SQS queue and one or more Amazon CloudWatch alarms. You will be billed for the AWS resources used if you create a stack from this template."
+
+Resources: 
+  LambdaExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: /
+      Policies:
+        - PolicyName: dynamo-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Action:
+              - sqs:DeleteMessage
+              - sqs:ReceiveMessage
+              - sqs:SendMessage
+              Resource: "*" 
+              Effect: Allow
+
+        - PolicyName: cloudwatchlogswrite-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              Resource: "*"
+              Effect: Allow 
+
+  CreateLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: "python3.8"
+      Timeout: 60
+      Handler: "index.lambda_handler"
+      Code: 
+        ZipFile: |
+          from __future__ import print_function # Python 2/3 compatibility
+          import boto3
+          import botocore
+          import json
+          import decimal
+          import urllib
+          import cfnresponse
+
+          # Resource 
+          s3 = boto3.client('s3')
+          dynamo = boto3.client('dynamodb')
+
+          # Constants
+          #table = dynamodb.Table('AlertConfiguration')
+
+          def lambda_handler(event, context):
+            try:                
+              
+
+              print(event)
+              print( event['RequestType'] ) 
+      
+Outputs: 
+  LambdaARN: 
+    Description: "ARN of newly created Lambda"
+    Value: 
+      Fn::GetAtt: 
+        - "CreateLambda"
+        - "Arn"

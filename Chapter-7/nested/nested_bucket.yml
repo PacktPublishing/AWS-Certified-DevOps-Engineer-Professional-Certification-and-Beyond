@@ -1,0 +1,22 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: S3 Bucket with outputs from nested stack 
+# Parameters:
+#   S3url:
+#     !GetAtt 
+#           - chapt7
+#           - Outputs.S3url
+# #     # Description: The shared value will be passed to this parameter by parent stack.
+Resources:
+  NestedBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+  
+  
+      
+Outputs: 
+  BucketName:
+    Description: Name of the Nested Bucket 
+    Value: !Ref NestedBucket
+    
