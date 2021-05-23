@@ -1,0 +1,171 @@
+{ 
+    "Version":"2012-10-17",
+    "Statement":[ 
+       { 
+          "Effect":"Allow",
+          "Action":[ 
+             "codecommit:BatchGet*",
+             "codecommit:BatchDescribe*",
+             "codecommit:Describe*",
+             "codecommit:Get*",
+             "codecommit:List*",
+             "codecommit:Put*",
+             "codecommit:Post*",
+             "codecommit:GitPull",
+             "codecommit:GitPush",
+             "codepipeline:ListPipelines",
+             "codepipeline:*",
+             "codebuild:*",
+             "codedeploy:*"
+          ],
+          "Resource":"*"
+       },
+       {
+        "Sid": "IAMReadOnlyListAccess",
+        "Effect": "Allow",
+        "Action": [
+          "s3:DeleteBucket"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "CleanUpCreatedS3buckets",
+        "Effect": "Allow",
+        "Action": [
+          "iam:ListUsers"
+        ],
+        "Resource": "*"
+      },
+       {
+         "Sid": "IAMReadOnlyConsoleAccess",
+         "Effect": "Allow",
+         "Action": [
+           "iam:ListAccessKeys",
+           "iam:ListSSHPublicKeys",
+           "iam:ListServiceSpecificCredentials"
+         ],
+         "Resource": "arn:aws:iam::*:user/${aws:username}"
+       },
+       {
+         "Sid": "SNSTopicAndSubscriptionAccess",
+         "Effect": "Allow",
+         "Action": [
+           "sns:Subscribe",
+           "sns:Unsubscribe"
+         ],
+         "Resource": "arn:aws:sns:*:*:codecommit*"
+       },
+       {
+        "Sid": "SNSTopicAndSubscriptionReadAccess",
+        "Effect": "Allow",
+        "Action": [
+          "sns:ListTopics",
+          "sns:CreateTopic",
+          "sns:DeleteTopic",
+          "sns:Subscribe",
+          "sns:ListSubscriptionsByTopic",
+          "sns:GetTopicAttributes"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "ECSPermissions",
+        "Effect": "Allow",
+        "Action": [
+            "ecs:CreateCluster",
+            "ecs:CreateService",
+            "ecs:DeleteCluster",
+            "ecs:DescribeServices",
+            "ecs:DeleteService",
+            "ecs:DeleteTaskSet",
+            "ecs:RegisterTaskDefinition",
+            "ecr:GetDownloadUrlForLayer",
+            "ecr:GetAuthorizationToken"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "CloudFormationPermissions",
+        "Effect": "Allow",
+        "Action": [
+          "iam:CreateRole",
+          "iam:CreateInstanceProfile",
+          "iam:DeleteInstanceProfile",
+          "iam:AddRoleToInstanceProfile",
+          "s3:CreateBucket",
+          "iam:GetRole",
+          "iam:ListRoles",
+          "iam:PassRole",
+          "iam:DeleteRolePolicy",
+          "iam:GetRolePolicy",
+          "iam:DeleteRole",
+          "iam:PutRolePolicy",
+          "iam:RemoveRoleFromInstanceProfile",
+          "cloudformation:*",
+          "cloudwatch:PutMetricAlarm",
+          "cloudwatch:DeleteAlarms",
+          "logs:CreateLogGroup",
+          "logs:DeleteLogGroup",
+          "elasticloadbalancing:Describe*",
+          "elasticloadbalancing:CreateTargetGroup",
+          "elasticloadbalancing:CreateLoadBalancer",
+          "elasticloadbalancing:CreateListener",
+          "elasticloadbalancing:DeleteListener",
+          "elasticloadbalancing:DeleteTargetGroup",
+          "elasticloadbalancing:ModifyListener",
+          "elasticloadbalancing:ModifyLoadBalancerAttributes",
+          "application-autoscaling:DeleteScalingPolicy",
+          "application-autoscaling:Describe*",
+          "application-autoscaling:PutScalingPolicy",
+          "application-autoscaling:DeregisterScalableTarget",
+          "application-autoscaling:RegisterScalableTarget",
+          "autoscaling:*"
+        ],
+        "Resource":"*"
+      },
+      {
+       "Sid": "LambdaLimitedAccess",
+       "Effect": "Allow",
+       "Action": [
+         "lambda:ListFunctions",
+         "lambda:GetFunctionConfiguration",
+         "lambda:InvokeFunction"
+       ],
+       "Resource": "*"
+      },
+       {
+         "Sid": "IAMUserSSHKeys",
+         "Effect": "Allow",
+         "Action": [
+           "iam:DeleteSSHPublicKey",
+           "iam:GetSSHPublicKey",
+           "iam:ListSSHPublicKeys",
+           "iam:UpdateSSHPublicKey",
+           "iam:UploadSSHPublicKey"
+         ],
+         "Resource": "arn:aws:iam::*:user/${aws:username}"
+       },
+       {
+        "Sid":"UploadTemplatesToS3",
+        "Effect": "Allow",
+        "Action": [
+          "s3:PutObject",
+          "s3:CreateBucket",
+          "s3:GetObject",
+          "s3:ListBucket"
+        ],
+        "Resource": "arn:aws:s3:::cf-template*"
+       },
+       {
+         "Sid": "IAMSelfManageServiceSpecificCredentials",
+         "Effect": "Allow",
+         "Action": [
+           "iam:CreateServiceSpecificCredential",
+           "iam:UpdateServiceSpecificCredential",
+           "iam:DeleteServiceSpecificCredential",
+           "iam:ResetServiceSpecificCredential"
+         ],
+         "Resource": "arn:aws:iam::*:user/${aws:username}"
+       }
+    ]
+}
