@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang=en> 
+    <head> 
+        <meta charset="UTF-8">
+        <title>Beanstalk Mini-Quiz</title>
+        <link rel="stylesheet" type="text/css" href="static/stylesheet.css">
+
+    </head>
+    <body>
+        <div>
+            <h1> Welcome to the Quiz </h1>
+            <br>
+            <form action="/" method="POST">
+                {% for question in data %} 
+                <h2> {{question.question}} </h2>
+
+                {% for answer in question.answers %} 
+                <input type="radio" id="{{ answer }}" name="{{ question.id }}" value="{{ answer }}"> {{ answer }} <br>
+                {% endfor %} 
+
+                {% endfor %} 
+                <br>
+                <input type="submit" value="Submit" name="Submit" />
+            </form>
+        </div>
+    </body>
+</html>

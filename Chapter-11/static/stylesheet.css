@@ -1,0 +1,25 @@
+body {
+    background-color: #e1b382;
+}
+
+h1 {
+    color: #daf57a;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 26px;
+    margin-left: 100px;
+    margin-top: 100px;
+}
+
+h2 {
+    color: #8076ac;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 21px;
+    margin-left: 0px;
+}
+
+form {
+    color: #7c677f;
+    font-family: Arial;
+    font-size: 18px;
+    margin-left: 100px;
+}
