@@ -1,0 +1,21 @@
+{
+    "description": "Install ClamAV on Amazon Linux, Run freshclam and clamscan",
+    "schemaVersion": "2.2",
+    "mainSteps": [
+      {
+        "inputs": {
+          "runCommand": [
+            "#!/bin/bash",
+            "sudo amazon-linux-extras install -y epel",
+            "sudo yum -y install clamav",
+            "sudo touch /var/log/freshclam.log",
+            "sudo chmod 600 /var/log/freshclam.log",
+            "sudo freshclam ",
+            "sudo clamscan -r /var --leave-temps"
+          ]
+        },
+        "name": "ALclamInstall",
+        "action": "aws:runShellScript"
+      }
+    ]
+  }

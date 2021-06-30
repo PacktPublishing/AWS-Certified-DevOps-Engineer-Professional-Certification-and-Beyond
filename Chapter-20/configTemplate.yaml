@@ -1,0 +1,197 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+
+  # DeliveryChannelS3Prefix:
+  #   Description: The key prefix ('folder') into which to insert config snapshots
+  #   Type: String
+  # DeliveryChannelS3Bucket:
+  #   Description: The full ARN of the bucket to which you wish to periodically push config snapshots. 
+  #   Type: String 
+    
+  MaximumExecutionFrequency:
+    Type: String
+    Default: TwentyFour_Hours
+    Description: The frequency that you want AWS Config to run evaluations for the rule.
+    MinLength: '1'
+    ConstraintDescription: This parameter is required.
+    AllowedValues:
+      - One_Hour
+      - Three_Hours
+      - Six_Hours
+      - Twelve_Hours
+      - TwentyFour_Hours
+  
+  ConfigRule1:
+    Type: String
+    Default: iam-user-no-policies-check
+    Description: The name that you assign to the AWS Config rule.
+    MinLength: '1'
+    ConstraintDescription: This parameter is required.
+  
+  ConfigRuleNameTwo:
+    Type: String
+    Default: iam-user-unused-credentials-check
+    Description: The name that you assign to the AWS Config rule.
+    MinLength: '1'
+    ConstraintDescription: This parameter is required.
+
+  ConfigRuleNameThree:
+    Type: String
+    Default: root-account-mfa-enabled
+    Description: The name that you assign to the AWS Config rule.
+    MinLength: '1'
+    ConstraintDescription: This parameter is required.
+
+  # s3BucketName:
+  #   Type: String
+  #   Default: ''
+  #   Description: Name of S3 bucket for CloudTrail to deliver log files to.
+  
+  
+  
+Resources:
+
+  ConfigRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [config.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      ManagedPolicyArns: ['arn:aws:iam::aws:policy/service-role/AWSConfigRole']
+      Policies:
+      - PolicyName: "AWSConfigDeliveryPermissions"
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: s3:GetBucketAcl
+            Resource: !Join ['', ['arn:aws:s3:::', !Ref 'ConfigBucket']]
+          - Effect: Allow
+            Action: s3:PutObject
+            Resource: !Join ['', ['arn:aws:s3:::', !Ref 'ConfigBucket', /AWSLogs/,
+                !Ref 'AWS::AccountId', /*]]
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+          - Effect: Allow
+            Action: config:Put*
+            Resource: '*'
+          - Effect: "Allow"
+            Action: "lambda:InvokeFunction"
+            Resource: "*"
+          - Effect: "Allow"
+            Action: "sns:Publish"
+            Resource: "*"
+ 
+  AutomatedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [config.amazonaws.com, ssm.amazonaws.com, ec2.amazonaws.com ]
+          Action: ['sts:AssumeRole']
+      ManagedPolicyArns: ['arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole']
+      Policies:
+      - PolicyName: "snsStar"
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: sns:*
+            Resource: '*'
+  
+  ConfigBucket:
+    Type: AWS::S3::Bucket
+  ConfigTopic:
+    Type: AWS::SNS::Topic
+
+  ConfigTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Id: ConfigTopicPolicy
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: config.amazonaws.com
+          Action: SNS:Publish
+          Resource: '*'
+      Topics: [!Ref 'ConfigTopic']
+
+  EC2VolumeRecorder:
+    Type: AWS::Config::ConfigurationRecorder
+    Properties:
+      Name: default
+      RecordingGroup:
+        ResourceTypes:
+        - "AWS::EC2::Volume"
+      RoleARN:
+        Fn::GetAtt:
+          - ConfigRole
+          - Arn
+    DependsOn: ConfigRole
+
+  DeliveryChannel:
+    Type: AWS::Config::DeliveryChannel
+    Properties:
+      Name: default
+      S3BucketName: !Ref ConfigBucket 
+      SnsTopicARN: !Ref 'ConfigTopic'
+    DependsOn:
+      - ConfigRole  
+    
+  AWSConfig1:
+    Type: 'AWS::Config::ConfigRule'
+    Properties:
+      ConfigRuleName: !Ref ConfigRule1
+      Description: >-
+        Checks that none of your IAM users have policies attached. IAM users
+        must inherit permissions from IAM groups or roles.
+      InputParameters: {}
+      Scope:
+        ComplianceResourceTypes:
+          - 'AWS::IAM::User'
+      Source:
+        Owner: AWS
+        SourceIdentifier: IAM_USER_NO_POLICIES_CHECK
+    DependsOn: EC2VolumeRecorder
+  
+
+  AWSConfigRuleThree:
+    Type: 'AWS::Config::ConfigRule'
+    Properties:
+      ConfigRuleName: !Ref ConfigRuleNameThree
+      Description: >-
+        Checks whether the root user of your AWS account requires multi-factor
+        authentication for console sign-in.
+      InputParameters: {}
+      Scope: {}
+      Source:
+        Owner: AWS
+        SourceIdentifier: ROOT_ACCOUNT_MFA_ENABLED
+      MaximumExecutionFrequency: !Ref MaximumExecutionFrequency
+    DependsOn: EC2VolumeRecorder
+  
+
+  
+
+
+      
+  
+# Conditions:
+
+#   s3BucketName: !Not 
+#     - !Equals 
+#       - ''
+#       - !Ref s3BucketName
+
+  
