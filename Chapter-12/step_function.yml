@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Step function to migrate between accounts 
+
+Parameters:
+  LambdaFunctionBucket:
+      Description: The S3 bucket where the lambda functions are placed 
+      Type: String 
+
+Resources:
+
+  FindWCFunction:
+    Properties:
+        Code: 
+          S3Bucket: !Sub ${LambdaFunctionBucket}
+          #S3Bucket: !Join ['', ['arn:aws:s3:::', !Ref 'LambdaFunctionBucket', /]]
+          S3Key: my-wc-package.zip
+        Description: Finds all snapshots for instance ID 
+        Handler: lambda_function.lambda_handler
+        Role: !GetAtt  'RoleLambda.Arn'
+        Runtime: python3.8
+        Timeout: 120
+    Type: AWS::Lambda::Function
+  
+  RoleLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [lambda.amazonaws.com ]
+          Action: ['sts:AssumeRole']
+      ManagedPolicyArns: ['arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole']
+
+  StateMachineRole:
+      Properties:
+        AssumeRolePolicyDocument:
+          Statement:
+          - Action:
+            - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                Fn::Sub: states.${AWS::Region}.amazonaws.com
+          Version: '2012-10-17'
+        Policies:
+        - PolicyDocument:
+            Statement:
+            - Action:
+              - lambda:InvokeFunction
+              Effect: Allow
+              Resource: '*'
+              Sid: InvokeLambda
+            Version: '2012-10-17'
+          PolicyName: InvokeLambda
+      Type: AWS::IAM::Role 
+
+  StateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: Chapter-Twelve
+      DefinitionString: 
+        !Sub 
+        - |-
+          {
+            "Comment": "A Demonstration State Machine with Lambda",
+            "StartAt": "Find Words",
+            "States": {
+              "Find Words": {
+                "Type": "Task",
+                "Resource": "${FindWCFunction}",
+                "ResultPath": "$.wordCount",
+                "Next": "ChoiceStateCountdown"
+              },
+              "ChoiceStateCountdown": {
+                "Type": "Choice",
+                "Choices": [
+                  {
+                    "Variable": "$.wordCount",
+                    "IsNull": false,
+                    "Next": "Small Pause"
+                  },
+                  {
+                    "Variable": "$.wordCount",
+                    "IsNull": true,
+                    "Next": "Error State"
+                  }
+                ],
+                "Default": "DefaultState"
+             },
+             "Small Pause": {
+               "Type": "Wait",
+               "Seconds": 10,
+               "End": true
+             },
+             "Error State": {
+               "Type": "Fail",
+               "Cause": "Invalid Choice"
+             },
+             "DefaultState": {
+               "Type": "Fail",
+               "Cause": "Default"
+             }
+            }
+          }
+        - {FindWCFunction: !GetAtt [FindWCFunction, Arn]}
+      RoleArn: !GetAtt 'StateMachineRole.Arn'
+
