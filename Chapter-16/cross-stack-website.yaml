@@ -1,0 +1,197 @@
+Description: This CloudFormation template uses cross-stack references for the VPC and then creates a Load Balancer and 
+
+Parameters:
+  NetworkStackName:
+    Description: Name of an active CloudFormation stack that contains the networking resources, such as the subnet and security group, that will be used in this stack
+    Type: String
+    MinLength: 1
+    MaxLength: 255
+    #AllowedPattern: "^[a-zA-Z0-9][-a-zA-Z]*$"
+    Default: "Chapter16-VPC"
+Mappings:
+  AWSRegionArch2AMI:
+    us-east-1:
+      HVM64: ami-0c2b8ca1dad447f8a
+      HVMG2: ami-06cf15d6d096df5d2
+    us-east-2:
+      HVM64: ami-0443305dabd4be2bc
+      HVMG2: ami-0806cc3ac66515671  
+
+Resources:
+  WebServerInstance1:
+    Type: 'AWS::EC2::Instance'
+    Metadata:
+      'AWS::CloudFormation::Init':
+        configSets:
+          All:
+            - SampleWebApp
+        SampleWebApp:
+          packages:
+            yum:
+              httpd: []
+          files:
+            /var/www/html/index.html:
+              content: !Join 
+                - |+
+
+                - - >-
+                    <head> <title> Sample Web App </title> </head> 
+                  - >-
+                    <h1>This is my webpage, there are many like it but this ONE is mine.</h1>
+              mode: '000644'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              httpd:
+                enabled: 'true'
+                ensureRunning: 'true'
+    Properties:
+      InstanceType: t2.micro
+      KeyName: pqueryOhio
+      ImageId: !FindInMap 
+        - AWSRegionArch2AMI
+        - !Ref 'AWS::Region'
+        - HVM64
+      NetworkInterfaces:
+        - GroupSet:
+            - !ImportValue 
+              'Fn::Sub': '${NetworkStackName}-SECGROUP'
+          AssociatePublicIpAddress: 'true'
+          DeviceIndex: '0'
+          DeleteOnTermination: 'true'
+          SubnetId: !ImportValue 
+            'Fn::Sub': '${NetworkStackName}-PUBSN1'
+      UserData: !Base64 
+        'Fn::Join':
+          - ''
+          - - |
+              #!/bin/bash -xe
+            - |
+              yum update -y aws-cfn-bootstrap
+            - |
+              # Install the files and packages from the metadata
+            - '/opt/aws/bin/cfn-init -v '
+            - '         --stack '
+            - !Ref 'AWS::StackName'
+            - '         --resource WebServerInstance1 '
+            - '         --configsets All '
+            - '         --region '
+            - !Ref 'AWS::Region'
+            - |+
+
+            - |
+              # Signal the status from cfn-init
+            - '/opt/aws/bin/cfn-signal -e $? '
+            - '         --stack '
+            - !Ref 'AWS::StackName'
+            - '         --resource WebServerInstance1 '
+            - '         --region '
+            - !Ref 'AWS::Region'
+            - |+
+
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT5M
+
+  WebServerInstance2:
+    Type: 'AWS::EC2::Instance'
+    Metadata:
+      'AWS::CloudFormation::Init':
+        configSets:
+          All:
+            - SampleWebApp
+        SampleWebApp:
+          packages:
+            yum:
+              httpd: []
+          files:
+            /var/www/html/index.html:
+              content: !Join 
+                - |+
+
+                - - >-
+                    <head> <title> Sample Web App </title> </head> 
+                  - >-
+                    <h1>This is my webpage, there are many like it but these TWO are mine.</h1>
+              mode: '000644'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              httpd:
+                enabled: 'true'
+                ensureRunning: 'true'
+    Properties:
+      InstanceType: t2.micro
+      KeyName: pqueryOhio
+      ImageId: !FindInMap 
+        - AWSRegionArch2AMI
+        - !Ref 'AWS::Region'
+        - HVM64
+      NetworkInterfaces:
+        - GroupSet:
+            - !ImportValue 
+              'Fn::Sub': '${NetworkStackName}-SECGROUP'
+          AssociatePublicIpAddress: 'true'
+          DeviceIndex: '0'
+          DeleteOnTermination: 'true'
+          SubnetId: !ImportValue 
+            'Fn::Sub': '${NetworkStackName}-PUBSN1'
+      UserData: !Base64 
+        'Fn::Join':
+          - ''
+          - - |
+              #!/bin/bash -xe
+            - |
+              yum update -y aws-cfn-bootstrap
+            - |
+              # Install the files and packages from the metadata
+            - '/opt/aws/bin/cfn-init -v '
+            - '         --stack '
+            - !Ref 'AWS::StackName'
+            - '         --resource WebServerInstance2 '
+            - '         --configsets All '
+            - '         --region '
+            - !Ref 'AWS::Region'
+            - |+
+
+            - |
+              # Signal the status from cfn-init
+            - '/opt/aws/bin/cfn-signal -e $? '
+            - '         --stack '
+            - !Ref 'AWS::StackName'
+            - '         --resource WebServerInstance2 '
+            - '         --region '
+            - !Ref 'AWS::Region'
+            - |+
+
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT5M          
+
+  ElasticLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      Listeners:
+      - LoadBalancerPort: '80'
+        InstancePort: '80'
+        Protocol: HTTP
+      Instances:
+      - !Ref WebServerInstance1
+      - !Ref WebServerInstance2 
+      Subnets: 
+       - !ImportValue
+         'Fn::Sub': '${NetworkStackName}-PRISN1'
+
+
+Outputs:
+  URL:
+    Description: URL of the sample website
+    Value: !Join 
+      - ''
+      - - 'http://'
+        - !GetAtt 
+          - ElasticLoadBalancer
+          - DNSName
+        
