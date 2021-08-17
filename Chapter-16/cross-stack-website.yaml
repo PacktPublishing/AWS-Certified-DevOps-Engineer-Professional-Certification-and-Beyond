@@ -137,7 +137,7 @@ Resources:
           DeviceIndex: '0'
           DeleteOnTermination: 'true'
           SubnetId: !ImportValue 
-            'Fn::Sub': '${NetworkStackName}-PUBSN1'
+            'Fn::Sub': '${NetworkStackName}-PUBSN2'
       UserData: !Base64 
         'Fn::Join':
           - ''
@@ -173,6 +173,9 @@ Resources:
   ElasticLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
+      SecurityGroups: 
+      - !ImportValue 
+        'Fn::Sub': '${NetworkStackName}-SECGROUP'
       Listeners:
       - LoadBalancerPort: '80'
         InstancePort: '80'
@@ -182,7 +185,7 @@ Resources:
       - !Ref WebServerInstance2 
       Subnets: 
        - !ImportValue
-         'Fn::Sub': '${NetworkStackName}-PRISN1'
+         'Fn::Sub': '${NetworkStackName}-PUBSN1'
 
 
 Outputs:
