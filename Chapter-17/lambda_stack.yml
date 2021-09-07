@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Create Lambda function to write logs to a CloudWatch log group for ingestion
+  into an ElasticSearch Cluster 
+Resources:
+  LogScheduledRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Description: ScheduledRule
+      ScheduleExpression: "rate(5 minutes)"
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt 
+            - LambdaLogGenerator
+            - Arn
+          Id: LambdaLogGeneratorTargetId
+  PermissionForLogScheduleToInvokeLambda:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !Ref LambdaLogGenerator
+      Action: 'lambda:InvokeFunction'
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt 
+        - LogScheduledRule
+        - Arn
+  
+  LambdaLogGenerator:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Description: 'Creates Log files with OS environment variables and event'
+      Code:
+        ZipFile: !Join 
+          - |+
+
+          - - import boto3
+            - import os
+            - import datetime
+            - 'def lambda_handler(event, context):'
+            - '    print("#### ENVIRONMENT VARIABLES ####")'
+            - '    print(os.environ)'
+            - '    print("#### EVENT DATA ####")'
+            - '    print(event)'
+      Handler: index.lambda_handler
+      Runtime: python3.8
+      Timeout: '300'
+      Role: !GetAtt 
+        - LambdaLoggerExecutionRole
+        - Arn
+  
+  LambdaLoggerExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: LambdaLoggerPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                  - 'es:*'
+                Resource: '*'
+Outputs: {}
