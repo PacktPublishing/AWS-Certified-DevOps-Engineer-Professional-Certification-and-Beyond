@@ -58,3 +58,7 @@ We also provide a PDF file that has color images of the screenshots/diagrams use
 ## Get to Know the Author
 **Adam Book**
 He has been programming since the age of six and has been constantly tapped by founders and CEOs as one of the pillars to start their online or cloud businesses. Adam has developed applications, and websites. He’s been involved in cloud computing and datacenter transformation professionally since 1996 focusing on bringing the benefits of cloud computing to his clients. He’s led technology teams in transformative changes such as the shift to programming in sprints, with Agile formats. Adam is a cloud evangelist with a track record of migrating thousands of applications to the cloud and guiding businesses in understanding cloud economics to create use cases and identify operating model gaps. He has been certified on AWS since 2014.
+### Download a free PDF
+
+ <i>If you have already purchased a print or Kindle version of this book, you can get a DRM-free PDF version at no cost.<br>Simply click on the link to claim your free PDF.</i>
+<p align="center"> <a href="https://packt.link/free-ebook/9781801074452">https://packt.link/free-ebook/9781801074452 </a> </p>
